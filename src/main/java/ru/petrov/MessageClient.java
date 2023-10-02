@@ -4,16 +4,15 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.io.IOException;
 
 public class MessageClient extends JFrame {
+    private final static int WIDTH = 800;
+    private final static int HEIGHT = 600;
+    private final Controller controller;
 
-    private int WIDTH = 800;
-    private int HEIGHT = 600;
-
-    JButton btnLogin, btnSend;
-    Controller controller;
+    private JTextField fieldLogin;
+    private JTextArea textArea;
 
     public MessageClient() throws Exception {
         controller = new Controller();
@@ -23,49 +22,86 @@ public class MessageClient extends JFrame {
         setTitle("Chat client");
         setLocationRelativeTo(null);
         setResizable(false);
+        setVisible(true);
 
+        JPanel panServer = panServer();
+        JPanel panUserInfo = panUserInfo();
+        JPanel panTextArea = panTextArea();
+        JPanel panServerAndUser = panServerAndUser(panServer, panUserInfo);
+        JPanel panelMessageAndSendBtn = panelMessageAndSendBtn();
+
+        add(panServerAndUser, BorderLayout.NORTH);
+        add(panTextArea);
+        add(panelMessageAndSendBtn, BorderLayout.SOUTH);
+
+        revalidate();
+    }
+
+    private JPanel panServer() {
 
         JPanel panServer = new JPanel(new GridLayout(1, 4));
-        JPanel panUserInfo = new JPanel(new GridLayout(1, 3));
-        JPanel panTextArea = new JPanel(new GridLayout(1, 1));
-        JPanel panServerAndUser = new JPanel(new GridLayout(2, 3));
-        JPanel panelMessageAndSendBtn = new JPanel(new BorderLayout());
-
         JTextField fieldHost = new JTextField("192.168.0.256");
         JTextField fieldPort = new JTextField("8080");
         JTextField fieldNull = new JTextField();
-        JTextField fieldLogin = new JTextField("Evgeny");
-        JTextField fieldMessage = new JTextField();
-        JPasswordField fieldPassword = new JPasswordField("qwerty");
-        fieldPassword.setEchoChar('*');
 
-        btnLogin = new JButton("login");
-        btnSend = new JButton("send");
-
-        JTextArea textArea = new JTextArea();
-
-        panTextArea.add(textArea);
         panServer.add(fieldHost);
         panServer.add(fieldPort);
         fieldNull.setVisible(false);
         panServer.add(fieldNull);
 
+        return panServer;
+    }
+
+    private JPanel panUserInfo() {
+
+        JPanel panUserInfo = new JPanel(new GridLayout(1, 3));
+        fieldLogin = new JTextField("Evgeny");
+        JPasswordField fieldPassword = new JPasswordField("qwerty");
+        JButton btnLogin = new JButton("login");
+
+        fieldPassword.setEchoChar('*');
+
         panUserInfo.add(fieldLogin);
         panUserInfo.add(fieldPassword);
         panUserInfo.add(btnLogin);
 
-        panServerAndUser.add(panServer);
-        panServerAndUser.add(panUserInfo);
+        btnLogin.addActionListener((e) -> {
+            textArea.setText(controller.readFIle());
+        });
+
+        return panUserInfo;
+    }
+
+
+    private JPanel panTextArea() {
+
+        JPanel panTextArea = new JPanel(new GridLayout(1, 1));
+        textArea = new JTextArea();
+
+        panTextArea.add(textArea);
+
+        return panTextArea;
+    }
+
+    private JPanel panServerAndUser(JPanel... panel) {
+
+        JPanel panServerAndUser = new JPanel(new GridLayout(2, 3));
+
+        for (JPanel jPanel : panel) {
+            panServerAndUser.add(jPanel);
+        }
+
+        return panServerAndUser;
+    }
+
+    private JPanel panelMessageAndSendBtn() {
+
+        JPanel panelMessageAndSendBtn = new JPanel(new BorderLayout());
+        JTextField fieldMessage = new JTextField();
+        JButton btnSend = new JButton("send");
 
         panelMessageAndSendBtn.add(fieldMessage, BorderLayout.CENTER);
         panelMessageAndSendBtn.add(btnSend, BorderLayout.EAST);
-
-
-        add(panServerAndUser, BorderLayout.NORTH);
-        add(textArea);
-        add(panelMessageAndSendBtn, BorderLayout.SOUTH);
-        setVisible(true);
-
 
         btnSend.addActionListener((e) -> {
             String text = fieldMessage.getText();
@@ -77,8 +113,8 @@ public class MessageClient extends JFrame {
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }
-
         });
+
         fieldMessage.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
@@ -96,11 +132,7 @@ public class MessageClient extends JFrame {
             }
         });
 
-        btnLogin.addActionListener((e) -> {
-            textArea.setText(controller.readFIle());
-        });
-
-        revalidate();
+        return panelMessageAndSendBtn;
     }
 
 }

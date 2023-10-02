@@ -36,4 +36,6 @@ public class MessageServer extends JFrame {
 
         setVisible(true);
     }
+
+
 }
